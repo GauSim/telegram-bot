@@ -4,6 +4,7 @@
   "description": "",
   "main": "release/index.js",
   "scripts": {
+    "postinstall": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node release/index.js",
     "start:debug": "./node_modules/.bin/ts-node --inspect ./src/index.ts",
