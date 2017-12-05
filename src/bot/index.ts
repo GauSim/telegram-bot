@@ -2,7 +2,7 @@
 const botgram = require('botgram');
 import { BotAPI } from './models';
 import { Router, Commands } from './Router';
-console.log('bot:start');
+import { IConnection } from '../core/dal/Connection';
 
 
 interface IBotConfig {
@@ -10,8 +10,10 @@ interface IBotConfig {
 }
 
 export class Bot {
-  public static start(config: IBotConfig) {
+  public static start(config: IBotConfig, con: IConnection) {
 
+    console.log('bot:start');
+    
     if (!config.secret) {
       console.error('[SECRET] missing')
     }
@@ -25,7 +27,7 @@ export class Bot {
 
       console.log("Talk to me: %s", bot.link());
 
-      const router = new Router(bot);
+      const router = new Router(bot, con);
 
     });
 
