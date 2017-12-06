@@ -2,7 +2,6 @@
 const botgram = require('botgram');
 import { BotAPI } from './models';
 import { Router, Commands } from './Router';
-import { IConnection } from '../core/dal/Connection';
 
 
 interface IBotConfig {
@@ -10,7 +9,7 @@ interface IBotConfig {
 }
 
 export class Bot {
-  public static start(config: IBotConfig, con: IConnection) {
+  public static start(config: IBotConfig) {
 
     console.log('bot:start');
     
@@ -21,14 +20,10 @@ export class Bot {
     const bot = botgram(config.secret) as BotAPI<Commands>;
 
     bot.on('ready', () => {
+      console.log('bot: (%s) starting to process messages.', bot.get('firstname'));
+      console.log("bot: talk to me: %s", bot.link());
 
-      console.log('Bot (%s) starting to process messages.', bot.get('firstname'));
-      // bot.link() needs username to be set, so it also can't be called earlier
-
-      console.log("Talk to me: %s", bot.link());
-
-      const router = new Router(bot, con);
-
+      return new Router().register(bot);
     });
 
   }

@@ -32,23 +32,24 @@ export interface Reply<TBot> {
   parameters: undefined;
   id: number;
   bot: TBot;
-  text(txt: string);
+  text(txt: string): void;
 }
 
 export type CommandController<TBot, TCommand> = (msg: Message<TCommand>, reply: Reply<TBot>) => void;
+export type CommandHandler<T> = CommandController<BotAPI<T>, T>;
 
 
 type BotEvent = 'ready'
 type BotPorp = 'firstname';
 
 export interface BotAPI<TCommand> {
-  command(command: TCommand | undefined, help: string | undefined, cb: CommandController<BotAPI<TCommand>, TCommand>)
-  command(command: TCommand | undefined, cb: CommandController<BotAPI<TCommand>, TCommand>)
-  command(cb: CommandController<BotAPI<TCommand>, TCommand>)
+  command(command: TCommand | undefined, help: string | undefined, cb: CommandController<BotAPI<TCommand>, TCommand>): void
+  command(command: TCommand | undefined, cb: CommandController<BotAPI<TCommand>, TCommand>): void
+  command(cb: CommandController<BotAPI<TCommand>, TCommand>): void
 
   on: (e: BotEvent, cb: () => void) => void;
 
-  get<T>(e:BotPorp): T
+  get<T>(e: BotPorp): T
 
   link(): string;
 

@@ -1,21 +1,18 @@
 require('dotenv').config();
+import "reflect-metadata";
 
 import { Bot } from './bot/index';
 import { Server } from './server/index';
-import { Connection } from './core/dal/Connection';
 
-const connection = new Connection({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
-});
+import { DI } from "./core/inversify.config";
+import { TYPES } from "./core/types";
+import { IConnection } from './core/dal/Connection';
+
 
 
 function start() {
 
-  Bot.start({ secret: process.env.SECRET }, connection);
+  Bot.start({ secret: process.env.SECRET });
 
   if (!process.env.NO_WEBSERVER)
     Server.start({
@@ -26,6 +23,7 @@ function start() {
 }
 
 // test connection
+const connection = DI.get<IConnection>(TYPES.Connection);
 connection.query('SELECT 1 + 1 AS solution')
   .then(d => start())
   .catch(e => console.error(e)); // exit -1

@@ -19,7 +19,7 @@ export class Router {
 
   private registerRoutes() {
     this.app.get('/ping', (req, res) => res.send('ping'));
-    this.app.get('/', (req, res) => res.send('ok'));
+    this.app.use('/', (req, res) => res.send('ok'));
   }
 
   public startServer(config: IServerConfig) {

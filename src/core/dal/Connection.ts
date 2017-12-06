@@ -1,4 +1,5 @@
 import mysql = require('mysql');
+import { injectable } from "inversify";
 
 export interface IDBConfig {
   host: string | undefined;
@@ -8,10 +9,18 @@ export interface IDBConfig {
   database: string | undefined;
 }
 
-export interface IConnection {
-  query: (sql: string, payload?: { [key: string]: number | string }) => Promise<{ results: { [key: string]: any }[] | { insertId: number }, fields: any }>
+export type IQueryResult = { [key: string]: any }[] & { insertId?: number };
+
+export interface IQueryResultEnvelope {
+  results: IQueryResult,
+  fields: any
 }
 
+export interface IConnection {
+  query: (sql: string, payload?: { [key: string]: number | string }) => Promise<IQueryResultEnvelope>
+}
+
+@injectable()
 export class Connection implements IConnection {
 
   private pool: mysql.Pool
@@ -29,13 +38,13 @@ export class Connection implements IConnection {
 
   }
 
-  query = (sql: string, payload?: { [key: string]: number | string }): Promise<{ results: { [key: string]: any }[] | { insertId: number }, fields: any }> => {
+  query = (sql: string, payload?: { [key: string]: number | string }): Promise<IQueryResultEnvelope> => {
 
     console.log('[SQL]', sql, payload);
 
     return new Promise((ok, fail) => {
 
-      const cb = (error, results, fields) => {
+      const cb = (error: any, results: IQueryResult, fields: any) => {
 
         if (error) {
           fail(error)

@@ -1,79 +1,63 @@
+import { injectable, inject } from "inversify";
 import mysql = require('mysql');
-import { IConnection } from './Connection';
+import { ERROR_UNEXPECTED_RESULTSET } from '../service/UserTransactionService';
 
+import { TYPES } from '../types';
+import * as assert from 'assert';
+import { IQueryResultEnvelope, IConnection } from './Connection';
 
-const INVALID_REQUEST_INPUT = 'INVALID_REQUEST_INPUT';
-const UNEXPECTED_RESULTSET = 'UNEXPECTED_RESULTSET';
-const OPERATION_NOT_ALLOWED = 'OPERATION_NOT_ALLOWED';
+export interface IUserTransactionDAO {
+  add(userid: number, amount: number): Promise<IQueryResultEnvelope>;
+  remove(userid: number, amount: number): Promise<IQueryResultEnvelope>;
+  getAmountSum(userid: number): Promise<number>;
+}
+
 
 // userid
 // amount
 // timestamp
-export class UserTransactionDAO {
+
+@injectable()
+export class UserTransactionDAO implements IUserTransactionDAO {
 
   private TABLE_NAME = 'user_transaction';
   private FIELD_USERID = 'userid';
   private FIELD_AMOUNT = 'amount';
+  private _con: IConnection
 
-  constructor(private readonly con: IConnection) {
-
+  constructor( @inject(TYPES.Connection) con: IConnection) {
+    assert(con);
+    this._con = con;
   }
 
   add(userid: number, amount: number) {
-    if (!userid || !amount || amount <= 0) {
-      return Promise.reject(new Error(INVALID_REQUEST_INPUT + JSON.stringify({ userid, amount })))
-    }
-
     const sql = `INSERT INTO ${this.TABLE_NAME} SET ?`
-
     const payload = {
       [this.FIELD_USERID]: userid,
       amount
     }
-
-    return this.con.query(sql, payload);
+    return this._con.query(sql, payload);
   }
 
   remove(userid: number, amount: number) {
-    if (!userid || !amount || amount <= 0) {
-      return Promise.reject(new Error(INVALID_REQUEST_INPUT + JSON.stringify({ userid, amount })))
-    }
-
-    return this.getAmountSum(userid)
-      .then(currentAmount => {
-
-        const rest = currentAmount - amount;
-        if (rest < 0) {
-          throw new Error(OPERATION_NOT_ALLOWED + JSON.stringify({ userid, amount }))
-        }
-
-      })
-      .then(_ => {
-
-        const sql = `INSERT INTO ${this.TABLE_NAME} SET ?`
-        const payload = {
-          [this.FIELD_USERID]: userid,
-          amount: (amount * -1)
-        };
-
-        return this.con.query(sql, payload);
-      });
+    const sql = `INSERT INTO ${this.TABLE_NAME} SET ?`
+    const payload = {
+      [this.FIELD_USERID]: userid,
+      amount: (amount * -1)
+    };
+    return this._con.query(sql, payload);
   }
 
-  getAmountSum(userid: number): Promise<number> {
-    if (!userid) {
-      return Promise.reject(new Error(INVALID_REQUEST_INPUT + JSON.stringify({ userid })))
-    }
-
+  getAmountSum(userid: number) {
     const sql = mysql.format(
       "SELECT sum( ?? ) as amount FROM ?? WHERE ?? = ?",
       [this.FIELD_AMOUNT, this.TABLE_NAME, this.FIELD_USERID, userid]
     );
 
-    return this.con.query(sql).then(r => {
+    return this._con.query(sql).then(r => {
 
       if (Array.isArray(r.results) && r.results.length != 1) {
-        throw new Error(UNEXPECTED_RESULTSET + JSON.stringify(r))
+        throw new Error(ERROR_UNEXPECTED_RESULTSET + JSON.stringify(r))
       }
 
       return r.results[0][this.FIELD_AMOUNT] as number;

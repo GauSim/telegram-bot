@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2017",
-    "noImplicitAny": false,
+    "target": "es5",
+    "noImplicitAny": true,
     "sourceMap": false,
     "strictNullChecks": true,
     "typeRoots": [
@@ -10,10 +10,18 @@
     ],
     "outDir": "release",
     "lib": [
-      "es2015",
-      "es2015.promise",
+      "es6",
       "dom"
-    ]
+    ],
+    "types": [
+      "reflect-metadata"
+    ],
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "allowUnusedLabels": false
   },
   "include": [
     "src/**/*"

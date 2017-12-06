@@ -1,76 +1,70 @@
-import { Message, BotAPI, CommandController } from "./models";
+import { BotAPI, CommandController } from './models';
 import { Logger } from './Logger';
-import { IConnection } from "../core/dal/Connection";
-import { UserTransactionCtrl } from "./UserTransactionCtrl";
-import { ErrorService } from "./ErrorService";
-import { UserTransactionDAO } from "../core/dal/UserTransactionDAO";
+import { UserTransactionCtrl } from './ctrl/UserTransactionCtrl';
+import { DI } from '../core/inversify.config';
+import { WelcomeCtrl } from './ctrl/WelcomeCtrl';
+
 export type Commands = 'ping' | 'echo' | 'start' | 'add' | 'remove';
 
 export type Route<TCommands> = {
   cmd: TCommands;
   help: string;
   withArgs: string[];
-  ctrl: CommandController<BotAPI<TCommands>, TCommands>;
+  getCtrl: () => CommandController<BotAPI<TCommands>, TCommands> | undefined;
 };
 
 
 export class Router {
 
-  constructor(
-    private readonly bot: BotAPI<Commands>,
-    private readonly con: IConnection,
-  ) {
+  constructor() { }
 
-    const errorService = new ErrorService();
-    const userTransactionCtrl = new UserTransactionCtrl(new UserTransactionDAO(con), errorService);
-
-    const routes: Route<Commands>[] = [
+  private getRoutes(): Route<Commands>[] {
+    return [
       {
         cmd: 'ping',
-        help: "bot will send you a 'pong'",
+        help: 'bot will send you a pong',
         withArgs: [],
-        ctrl: (msg, reply) => reply.text('pong')
+        getCtrl: () => DI.get(WelcomeCtrl).ping
       },
       {
         cmd: 'echo',
-        help: "bot will echo back at you",
+        help: 'bot will echo back at you',
         withArgs: ['[text]'],
-        ctrl: (msg, reply) => {
-
-          if (!msg.args || (msg.args && !msg.args.raw)) {
-            reply.text('send me some text... '); // todo wrap text => so we dont reply empty
-            return;
-          }
-
-          reply.text(msg.args.raw ? msg.args.raw : 'send me some text... ')
-        }
+        getCtrl: () => DI.get(WelcomeCtrl).echo
       },
       {
         cmd: 'add',
         help: 'add one',
         withArgs: [],
-        ctrl: userTransactionCtrl.add
+        getCtrl: () => DI.get(UserTransactionCtrl).add
       },
       {
         cmd: 'remove',
         help: 'remove one',
         withArgs: [],
-        ctrl: userTransactionCtrl.remove
+        getCtrl: () => DI.get(UserTransactionCtrl).remove
       }
-    ]
+    ];
+  }
 
+  public register(bot: Readonly<BotAPI<Commands>>) {
+
+    // bind ctrl to DI
+    DI.bind<UserTransactionCtrl>(UserTransactionCtrl).toSelf();
+    DI.bind<WelcomeCtrl>(WelcomeCtrl).toSelf();
+
+    const routes = this.getRoutes();
+
+    // dynamic
     routes.forEach(it => bot.command(it.cmd, it.help, Logger.register(it)));
 
-    const welcome = `
-    Hi, 
-    commands:
-    ${routes.map(it => `/${it.cmd} ${it.withArgs.length ? it.withArgs.join(' ') : ''} : ${it.help}`).join('\n')}
-    `
     // start 
-    bot.command('start', 'help', (msg, reply) => reply.text(welcome))
+    bot.command('start', 'help', DI.get(WelcomeCtrl).buildStart(routes))
 
     // default
-    bot.command((msg, reply) => reply.text("Invalid command."))
+    bot.command((msg, reply) => reply.text('Invalid command.'));
+
+    return this;
   }
 
 }
