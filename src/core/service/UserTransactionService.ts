@@ -22,7 +22,7 @@ export class UserTransactionService {
 
   add(userid: number, amount: number): Promise<number> {
     if (!userid || !amount || amount <= 0) {
-      return Promise.reject(new Error(ERROR_INVALID_REQUEST_INPUT + JSON.stringify({ userid, amount })))
+      return Promise.reject(new Error(ERROR_INVALID_REQUEST_INPUT + ' ' + JSON.stringify({ userid, amount })))
     }
 
     return this._dao.add(userid, amount)
@@ -31,14 +31,14 @@ export class UserTransactionService {
 
   remove(userid: number, amount: number): Promise<number> {
     if (!userid || !amount || amount <= 0) {
-      return Promise.reject(new Error(ERROR_INVALID_REQUEST_INPUT + JSON.stringify({ userid, amount })))
+      return Promise.reject(new Error(ERROR_INVALID_REQUEST_INPUT + ' ' + JSON.stringify({ userid, amount })))
     }
 
     return this._dao.getAmountSum(userid)
       .then(currentAmount => {
         const rest = currentAmount - amount;
         if (rest < 0) {
-          throw new Error(ERROR_OPERATION_NOT_ALLOWED + JSON.stringify({ userid, amount }))
+          throw new Error(ERROR_OPERATION_NOT_ALLOWED + ' ' + JSON.stringify({ userid, amount }))
         }
       })
       .then(_ => this._dao.remove(userid, amount))

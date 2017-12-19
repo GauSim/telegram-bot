@@ -1,4 +1,6 @@
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
+import { ILoggerService } from './LoggerService';
+import { TYPES } from '../types';
 
 export interface IErrorService {
   handle(error: any | Error): string;
@@ -6,19 +8,13 @@ export interface IErrorService {
 
 @injectable()
 export class ErrorService implements IErrorService {
+  private logger: ILoggerService;
+
+  constructor( @inject(TYPES.LoggerService) l: ILoggerService ) {
+    this.logger = l;
+  }
   public handle(error: any | Error): string {
-
-
-    let log = '';
-
-    if (error instanceof Error) {
-      log = error.message;
-    } else {
-      log = JSON.stringify(error, null, 2);
-    }
-
-    console.error(log)
-
+    this.logger.error(error);
     return `nope, ...`;
   }
 }

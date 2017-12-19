@@ -1,10 +1,11 @@
 import http = require('http');
+import { ILoggerService } from '../core/service/LoggerService';
 
-export function keepAlive(pingUrl: string) {
+export function keepAlive(pingUrl: string, logger:ILoggerService) {
 
-  console.log(`[keepAlive] starting loop ${Date.now()} ${pingUrl}`);
+  logger.info(`[keepAlive] starting loop ${Date.now()} ${pingUrl}`);
   setInterval(() => {
-    console.log(`[keepAlive] sending ping ${Date.now()} ${pingUrl}`);
+    logger.info(`[keepAlive] sending ping ${Date.now()} ${pingUrl}`);
     http.get(pingUrl, (res) => {
 
     });

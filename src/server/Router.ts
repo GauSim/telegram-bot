@@ -2,6 +2,7 @@ import express = require('express');
 import { Express } from 'express';
 
 import morgan = require('morgan');
+import { ILoggerService } from '../core/service/LoggerService';
 
 export interface IServerConfig {
   port: string | undefined;
@@ -22,14 +23,14 @@ export class Router {
     this.app.use('/', (req, res) => res.send('ok'));
   }
 
-  public startServer(config: IServerConfig) {
+  public startServer(config: IServerConfig, logger: ILoggerService) {
 
-    console.log('[Server] start');
-    
+    logger.info('[Server] start');
+
     this.registerRoutes();
 
     this.app.listen(config.port, () => {
-      console.log(`[Server] listening on ${config.port}`);
+      logger.info(`[Server] listening on ${config.port}`);
     });
   }
 }

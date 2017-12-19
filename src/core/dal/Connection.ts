@@ -1,5 +1,6 @@
 import mysql = require('mysql');
 import { injectable } from "inversify";
+import { ILoggerService } from '../service/LoggerService';
 
 export interface IDBConfig {
   host: string | undefined;
@@ -24,9 +25,10 @@ export interface IConnection {
 export class Connection implements IConnection {
 
   private pool: mysql.Pool
+  private logger: ILoggerService;
 
-  constructor(config: IDBConfig) {
-
+  constructor(config: IDBConfig, logger: ILoggerService) {
+    this.logger = logger;
     this.pool = mysql.createPool({
       connectionLimit: 10,
       host: config.host,
@@ -40,7 +42,7 @@ export class Connection implements IConnection {
 
   query = (sql: string, payload?: { [key: string]: number | string }): Promise<IQueryResultEnvelope> => {
 
-    console.log('[SQL]', sql, payload);
+    this.logger.info('[SQL]', sql, payload);
 
     return new Promise((ok, fail) => {
 

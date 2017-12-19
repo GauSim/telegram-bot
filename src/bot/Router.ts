@@ -1,8 +1,10 @@
 import { BotAPI, CommandController } from './models';
-import { Logger } from './Logger';
+import { BotRouteLogger } from './BotRouteLogger';
 import { UserTransactionCtrl } from './ctrl/UserTransactionCtrl';
 import { DI } from '../core/inversify.config';
 import { WelcomeCtrl } from './ctrl/WelcomeCtrl';
+import { TYPES } from '../core/types';
+import { ILoggerService } from '../core/service/LoggerService';
 
 export type Commands = 'ping' | 'echo' | 'start' | 'add' | 'remove';
 
@@ -53,10 +55,12 @@ export class Router {
     DI.bind<UserTransactionCtrl>(UserTransactionCtrl).toSelf();
     DI.bind<WelcomeCtrl>(WelcomeCtrl).toSelf();
 
+    const logger = DI.get<ILoggerService>(TYPES.LoggerService);
+
     const routes = this.getRoutes();
 
     // dynamic
-    routes.forEach(it => bot.command(it.cmd, it.help, Logger.register(it)));
+    routes.forEach(it => bot.command(it.cmd, it.help, BotRouteLogger.register(logger, it)));
 
     // start 
     bot.command('start', 'help', DI.get(WelcomeCtrl).buildStart(routes))
