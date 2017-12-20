@@ -5,12 +5,16 @@ import { UserTransactionDAO, IUserTransactionDAO } from './dal/UserTransactionDA
 import { UserTransactionService, IUserTransactionService } from './service/UserTransactionService';
 import { IErrorService, ErrorService } from './service/ErrorService';
 import { LoggerService, ILoggerService } from './service/LoggerService';
+import { IUserIntegrationDAO, UserIntegrationDAO } from './dal/UserIntegrationDAO';
+import { UserIntegrationService, IUserIntegrationService } from './service/UserIntegrationService';
 
 const DI = new Container();
 
 
 DI.bind<IUserTransactionDAO>(TYPES.UserTransactionDAO).to(UserTransactionDAO);
+DI.bind<IUserIntegrationDAO>(TYPES.UserIntegrationDAO).to(UserIntegrationDAO);
 DI.bind<IUserTransactionService>(TYPES.UserTransactionService).to(UserTransactionService);
+DI.bind<IUserIntegrationService>(TYPES.UserIntegrationService).to(UserIntegrationService);
 DI.bind<IErrorService>(TYPES.ErrorService).to(ErrorService);
 DI.bind<ILoggerService>(TYPES.LoggerService).to(LoggerService);
 

@@ -10,7 +10,10 @@ interface IBotConfig {
 }
 
 export class Bot {
-  public static start(config: IBotConfig, logger: ILoggerService) {
+  public static start(
+    logger: ILoggerService,
+    config: IBotConfig
+  ) {
 
     logger.info('bot:start');
 

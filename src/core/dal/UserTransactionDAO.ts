@@ -13,6 +13,7 @@ export interface IUserTransactionDAO {
 }
 
 
+
 // userid
 // amount
 // timestamp
@@ -43,7 +44,7 @@ export class UserTransactionDAO implements IUserTransactionDAO {
     const sql = `INSERT INTO ${this.TABLE_NAME} SET ?`
     const payload = {
       [this.FIELD_USERID]: userid,
-      amount: (amount * -1)
+      [this.FIELD_AMOUNT]: (amount * -1)
     };
     return this._con.query(sql, payload);
   }

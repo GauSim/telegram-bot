@@ -6,7 +6,7 @@ import { WelcomeCtrl } from './ctrl/WelcomeCtrl';
 import { TYPES } from '../core/types';
 import { ILoggerService } from '../core/service/LoggerService';
 
-export type Commands = 'ping' | 'echo' | 'start' | 'add' | 'remove';
+export type Commands = 'ping' | 'echo' | 'start' | 'add' | 'remove' | 'register';
 
 export type Route<TCommands> = {
   cmd: TCommands;
@@ -45,6 +45,12 @@ export class Router {
         help: 'remove one',
         withArgs: [],
         getCtrl: () => DI.get(UserTransactionCtrl).remove
+      },
+      {
+        cmd: 'register',
+        help: 'register integration',
+        withArgs: [],
+        getCtrl: () => DI.get(UserTransactionCtrl).register
       }
     ];
   }

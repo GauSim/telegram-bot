@@ -42,7 +42,7 @@ export class Connection implements IConnection {
 
   query = (sql: string, payload?: { [key: string]: number | string }): Promise<IQueryResultEnvelope> => {
 
-    this.logger.info('[SQL]', sql, payload);
+    this.logger.info('[SQL]', sql, payload || '');
 
     return new Promise((ok, fail) => {
 

@@ -12,13 +12,8 @@ import { ILoggerService } from './core/service/LoggerService';
 const logger = DI.get<ILoggerService>(TYPES.LoggerService);
 
 function start() {
-  Bot.start({ secret: process.env.SECRET }, logger);
-
-  if (!process.env.NO_WEBSERVER)
-    Server.start({
-      port: process.env.PORT,
-      host: process.env.HOST
-    }, logger);
+  Bot.start(logger, { secret: process.env.SECRET });
+  Server.start(logger, { port: process.env.PORT, host: process.env.HOST });
 }
 
 // test connection
